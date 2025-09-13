@@ -3,7 +3,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "sonner";
 
-
 const BASE_URL = "https://jsonplaceholder.typicode.com/comments";
 
 //  Fetch comments
@@ -14,6 +13,8 @@ export function useComments() {
       const res = await axios.get(`${BASE_URL}`);
       return res.data;
     },
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 }
 
@@ -45,7 +46,10 @@ export function useEditComment() {
     mutationFn: async ({
       id,
       values,
-    }: { id: number; values: Omit<commentInterface, "id"> }) => {
+    }: {
+      id: number;
+      values: Omit<commentInterface, "id">;
+    }) => {
       // just simulate
       return { id, ...values };
     },

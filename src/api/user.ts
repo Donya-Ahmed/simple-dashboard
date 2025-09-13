@@ -3,7 +3,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "sonner";
 
-
 const BASE_URL = "https://jsonplaceholder.typicode.com/users";
 
 //  Fetch users
@@ -14,6 +13,8 @@ export function useUsers() {
       const res = await axios.get(`${BASE_URL}`);
       return res.data;
     },
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 }
 
@@ -45,7 +46,10 @@ export function useEditUser() {
     mutationFn: async ({
       id,
       values,
-    }: { id: number; values: Omit<UsersInterface, "id"> }) => {
+    }: {
+      id: number;
+      values: Omit<UsersInterface, "id">;
+    }) => {
       // just simulate
       return { id, ...values };
     },

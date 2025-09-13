@@ -4,8 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import React, { useState } from "react";
 import { toast } from "sonner";
-
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 export function LoginForm({
   className,
@@ -13,17 +12,38 @@ export function LoginForm({
 }: React.ComponentProps<"form">) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
+    {}
+  );
+
   const navigate = useNavigate();
+
+  const validate = () => {
+    const newErrors: { email?: string; password?: string } = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+      newErrors.email = "Please enter a valid email.";
+    }
+    if (password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 🔹 Generate a fake token (no validation)
-    const fakeToken = "fake-jwt-token-" + Date.now();
+    if (!validate()) return;
 
+    //  Generate a fake token
+    const fakeToken = "fake-jwt-token-" + Date.now();
     localStorage.setItem("token", fakeToken);
 
     toast.success("Login successful");
-    navigate("/users");
+    navigate("/comments");
   };
 
   return (
@@ -38,20 +58,26 @@ export function LoginForm({
           Enter your email below to login to your account
         </p>
       </div>
+
       <div className="grid gap-6">
-        <div className="grid gap-3">
+        {/* Email */}
+        <div className="grid gap-1">
           <Label htmlFor="email">Email</Label>
           <Input
             id="email"
             type="email"
             placeholder="m@example.com"
-            required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
+          {errors.email && (
+            <p className="text-sm text-red-500">{errors.email}</p>
+          )}
         </div>
-        <div className="grid gap-3">
-          <div className="flex items-center">
+
+        {/* Password */}
+        <div className="grid gap-1">
+          <div className="flex items-center justify-between">
             <Label htmlFor="password">Password</Label>
             <a
               href="#"
@@ -63,14 +89,20 @@ export function LoginForm({
           <Input
             id="password"
             type="password"
-            required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+          {errors.password && (
+            <p className="text-sm text-red-500">{errors.password}</p>
+          )}
         </div>
+
+        {/* Submit */}
         <Button type="submit" className="w-full">
           Login
         </Button>
+
+        {/* Github */}
         <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
           <span className="bg-background text-muted-foreground relative z-10 px-2">
             Or continue with
@@ -92,11 +124,12 @@ export function LoginForm({
           Login with GitHub
         </Button>
       </div>
+
       <div className="text-center text-sm">
         Don&apos;t have an account?{" "}
-        <a href="#" className="underline underline-offset-4">
+        <NavLink to="signup" className="underline underline-offset-4">
           Sign up
-        </a>
+        </NavLink>
       </div>
     </form>
   );
